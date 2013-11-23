@@ -21,7 +21,7 @@ for line in f:lines() do
 					local sub = line:sub(0, end_index)
 					if (string.match(sub, signal)) then
 						local to_write = line:sub(end_index + 1)
-						print(to_write)
+						--print(to_write)
 						writeable:write(to_write);
 						writeable:write("\n");
 						count = count + 1;

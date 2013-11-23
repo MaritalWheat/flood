@@ -7,8 +7,8 @@ local final_offset = 0;
 local rest_of_file = "";
 local record = false;
 local search_terms = {}
-local MAX_SEARCH_TERMS = 100;
-local SEED_VALUE = 6000;
+local MAX_SEARCH_TERMS = 10000;
+local SEED_VALUE = 25;
 
 function Create_Searchables(num_terms, seek_value) 
 	local count = 1

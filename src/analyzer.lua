@@ -47,7 +47,7 @@ function month_to_int(in_string)
 	if (in_string == "December") then return 12 end;
 end
 
-function parse_date(in_string)
+function parse_rank_date(in_string)
 	--input format: [day] [month + date] [year]
 	local out = {month = "-", date = "-", year = "-"};
 	local input = in_string:split(", ");
@@ -70,10 +70,28 @@ function parse_date(in_string)
 	out.date = date;
 	out.year = year;
 
-	print(out.month);
-	print(out.date);
-	print(out.year);
+	--print(out.month);
+	--print(out.date);
+	--print(out.year);
+	return out;
 end
+
+function parse_game_date(input)
+	local out = {month = "-", date = "-", year = "-"};
+
+	local split_results = input:split(" ");
+	if (split_results[1] == nil) then return out end;
+
+	local date_table = split_results[1]:split("/")
+	if (date_table[1] == nil) then return out end;
+	if (date_table[2] == nil) then return out end;
+	if (date_table[3] == nil) then return out end;
+
+	out.month = date_table[1];
+	out.date = date_table[2];
+	out.year = date_table[3];
+	return out;
+end 
 
 data = get_path();
 
@@ -83,6 +101,13 @@ local line = data[data_index];
 local player_table = {};
 
 local curr_player;
+local date_lieutenant;
+local date_captain;
+local date_commander;
+local date_colonel;
+local date_brigadier;
+local date_general;
+
 
 while(line ~= nil) do
 	
@@ -90,8 +115,19 @@ while(line ~= nil) do
 	
 	split_line = line:split(" | ");
 
+	local game_date = parse_game_date(split_line[1]);
+	print(game_date.month .. "/" .. game_date.date .. "/" .. game_date.year);
+
 	--case for first player in file
-	if (curr_player == nil) then curr_player = split_line[5] end;
+	if (curr_player == nil) then 
+		curr_player = split_line[5];
+		date_lieutenant = parse_rank_date(split_line[7]);
+		date_captain = parse_rank_date(split_line[8]);
+		date_commander = parse_rank_date(split_line[9]);
+		date_colonel = parse_rank_date(split_line[10]);
+		date_brigadier = parse_rank_date(split_line[11]);
+		date_general = parse_rank_date(split_line[12]);
+	end
 
 	if (split_line[5] ~= curr_player) then
 
@@ -100,13 +136,23 @@ while(line ~= nil) do
 
 		if (user_validation ~= "unreliable") then
 			--create Player object
-			local Player = {name = curr_player};
+			local Player = {name = curr_player, date_lt = date_lieutenant, date_ct = date_captain,
+				date_com = date_commander, date_col = date_colonel, date_bg = date_brigadier,
+				date_gen = date_general};
+
 			--insert Player object into table
 			table.insert(player_table, Player);
-			print(Player.name);
-			parse_date(split_line[7]);
+			
+			--print(Player.name .. " " .. Player.date_lt.month .. "/" .. Player.date_lt.date .. "/" .. Player.date_lt.year);
+			
 			--update current player
 			curr_player = split_line[5];
+			date_lieutenant = parse_rank_date(split_line[7]);
+			date_captain = parse_rank_date(split_line[8]);
+			date_commander = parse_rank_date(split_line[9]);
+			date_colonel = parse_rank_date(split_line[10]);
+			date_brigadier = parse_rank_date(split_line[11]);
+			date_general = parse_rank_date(split_line[12]);
 		end
 	end
 

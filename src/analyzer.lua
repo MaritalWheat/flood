@@ -37,16 +37,40 @@ data = get_path();
 local data_index = 1;
 local line = data[data_index];
 
+local player_table = {};
+
+local curr_player;
+
 while(line ~= nil) do
 	
 	--format: [time date] [map] [gametype] [place] [name] [highest rank] [rank1] [rank2] [rank3] [rank4] [rank5] [rank6]
+	
 	split_line = line:split(" | ");
 
-	print(split_line[1]);
+	--case for first player in file
+	if (curr_player == nil) then curr_player = split_line[5] end;
+
+	if (split_line[5] ~= curr_player) then
+
+		--check if player name is "unreliable"
+		local user_validation = string.sub(split_line[5], 0, 10);
+
+		if (user_validation ~= "unreliable") then
+			--create Player object
+			local Player = {name = curr_player};
+			--insert Player object into table
+			table.insert(player_table, Player);
+			print(Player.name);
+			--update current player
+			curr_player = split_line[5];
+		end
+	end
 
 	data_index = data_index + 1;
 	line = data[data_index];
 end
+
+print("Number of entries: " .. #player_table);
 
 
 

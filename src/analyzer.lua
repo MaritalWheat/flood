@@ -122,6 +122,17 @@ function date_compare(game_date, rank_date)
 	return true;
 end
 
+function check_data_validity(highest_rank, lt, ct, com, col, bg, gen)
+	local rank_num = tonumber(highest_rank);
+	if (rank_num <= 10 and lt > 0) then return true end;
+	if (rank_num <= 20 and lt > 0 and ct > 0) then return true end;
+	if (rank_num <= 30 and lt > 0 and ct > 0 and com > 0) then return true end;
+	if (rank_num <= 40 and lt > 0 and ct > 0 and com > 0 and col > 0) then return true end;
+	if (rank_num <= 45 and lt > 0 and ct > 0 and com > 0 and col > 0 and bg > 0) then return true end;
+	if (rank_num <= 50 and lt > 0 and ct > 0 and com > 0 and col > 0 and bg > 0 and gen > 0) then return true end;
+	return false;
+end
+
 data = get_path();
 
 local data_index = 1;
@@ -130,6 +141,8 @@ local line = data[data_index];
 local player_table = {};
 
 local curr_player;
+local highest_rank;
+
 local date_lieutenant;
 local date_captain;
 local date_commander;
@@ -145,7 +158,7 @@ local games_brigadier = 0;
 local games_general = 0;
 
 --is there data that covers all the ranks earned
-local invalid;
+local validity = false;
 
 --local date1 = {month = "2", date = "10", year = "2012"};
 --local date2 = {month = "2", date = "1", year = "2012"};
@@ -164,6 +177,7 @@ while(line ~= nil) do
 	--case for first player in file
 	if (curr_player == nil) then 
 		curr_player = split_line[5];
+		highest_rank = split_line[6];
 		date_lieutenant = parse_rank_date(split_line[7]);
 		date_captain = parse_rank_date(split_line[8]);
 		date_commander = parse_rank_date(split_line[9]);
@@ -178,7 +192,7 @@ while(line ~= nil) do
 	elseif (date_compare(game_date, date_commander)) then games_commander = games_commander + 1
 	elseif (date_compare(game_date, date_colonel)) then games_colonel = games_colonel + 1
 	elseif (date_compare(game_date, date_brigadier)) then games_brigadier = games_brigadier + 1
-	elseif (date_compare(game_date, date_general)) then games_general = games_general + 1 end
+	elseif (date_compare(game_date, date_general)) then games_general = games_general + 1 end;
 
 	--work done if player switched
 	if (split_line[5] ~= curr_player) then
@@ -188,18 +202,26 @@ while(line ~= nil) do
 
 		if (user_validation ~= "unreliable") then
 			--create Player object
-			local Player = {name = curr_player, date_lt = date_lieutenant, date_ct = date_captain,
+			validity = check_data_validity(highest_rank, games_lieutenant, games_captain, games_commander,
+				games_colonel, games_brigadier, games_general);
+
+			local Player = {name = curr_player, max_rank = highest_rank, date_lt = date_lieutenant, date_ct = date_captain,
 				date_com = date_commander, date_col = date_colonel, date_bg = date_brigadier,
 				date_gen = date_general, games_lt = games_lieutenant, games_ct = games_captain,
 				games_com = games_commander, games_col = games_colonel, games_bg = games_brigadier,
-				games_gen = games_general};
+				games_gen = games_general, valid = validity};
+
 
 			--insert Player object into table
+			if (Player.valid) then
+			
 			table.insert(player_table, Player);
 			
 			--print(Player.name .. " " .. Player.date_lt.month .. "/" .. Player.date_lt.date .. "/" .. Player.date_lt.year);
-			print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
-				.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);
+			
+				print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
+					.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);
+			end
 
 			--update current player
 			curr_player = split_line[5];
@@ -216,6 +238,8 @@ while(line ~= nil) do
 			games_colonel = 0;
 			games_brigadier = 0;
 			games_general = 0;
+
+			validity = false;
 		end
 	end
 

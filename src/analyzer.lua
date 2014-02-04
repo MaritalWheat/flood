@@ -96,14 +96,27 @@ end
 --expects properly formatted parameters!
 --returns true if game date before rank date, false otherwise
 function date_compare(game_date, rank_date)
-	if (game_date.year < rank_date.year) then return true end;
-	if (game_date.year > rank_date.year) then return false end;
-	
-	if (game_date.month < rank_date.month) then return true end;
-	if (game_date.month > rank_date.month) then return false end;
+	local game_day = tonumber(game_date.date);
+	local game_month = tonumber(game_date.month);
+	local game_year = tonumber(game_date.year);
 
-	if (game_date.date < rank_date.date) then return true end;
-	if (game_date.date > rank_date.date) then return false end;
+	local rank_day = tonumber(rank_date.date);
+	local rank_month = tonumber(rank_date.month);
+	local rank_year = tonumber(rank_date.year);
+
+	--were either of the dates passed in invalid?
+	if (game_day == nil or rank_day == nil) then
+		return false;
+	end
+
+	if (game_year < rank_year) then return true end;
+	if (game_year > rank_year) then return false end;
+	
+	if (game_month < rank_month) then return true end;
+	if (game_month > rank_month) then return false end;
+
+	if (game_day < rank_day) then return true end;
+	if (game_day > rank_day) then return false end;
 
 	--if exact same date, give game to lower rank
 	return true;
@@ -124,10 +137,20 @@ local date_colonel;
 local date_brigadier;
 local date_general;
 
-local date1 = {month = "2", date = "10", year = "2012"};
-local date2 = {month = "2", date = "1", year = "2012"};
+local games_lieutenant = 0;
+local games_captain = 0;
+local games_commander = 0;
+local games_colonel = 0;
+local games_brigadier = 0;
+local games_general = 0;
 
-print(date_compare(date1, date2));
+--is there data that covers all the ranks earned
+local invalid;
+
+--local date1 = {month = "2", date = "10", year = "2012"};
+--local date2 = {month = "2", date = "1", year = "2012"};
+
+--print(date_compare(date1, date2));
 
 while(line ~= nil) do
 	
@@ -149,6 +172,15 @@ while(line ~= nil) do
 		date_general = parse_rank_date(split_line[12]);
 	end
 
+
+	if (date_compare(game_date, date_lieutenant)) then games_lieutenant = games_lieutenant + 1 
+	elseif (date_compare(game_date, date_captain)) then games_captain = games_captain + 1
+	elseif (date_compare(game_date, date_commander)) then games_commander = games_commander + 1
+	elseif (date_compare(game_date, date_colonel)) then games_colonel = games_colonel + 1
+	elseif (date_compare(game_date, date_brigadier)) then games_brigadier = games_brigadier + 1
+	elseif (date_compare(game_date, date_general)) then games_general = games_general + 1 end
+
+	--work done if player switched
 	if (split_line[5] ~= curr_player) then
 
 		--check if player name is "unreliable"
@@ -158,13 +190,17 @@ while(line ~= nil) do
 			--create Player object
 			local Player = {name = curr_player, date_lt = date_lieutenant, date_ct = date_captain,
 				date_com = date_commander, date_col = date_colonel, date_bg = date_brigadier,
-				date_gen = date_general};
+				date_gen = date_general, games_lt = games_lieutenant, games_ct = games_captain,
+				games_com = games_commander, games_col = games_colonel, games_bg = games_brigadier,
+				games_gen = games_general};
 
 			--insert Player object into table
 			table.insert(player_table, Player);
 			
 			--print(Player.name .. " " .. Player.date_lt.month .. "/" .. Player.date_lt.date .. "/" .. Player.date_lt.year);
-			
+			print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
+				.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);
+
 			--update current player
 			curr_player = split_line[5];
 			date_lieutenant = parse_rank_date(split_line[7]);
@@ -173,6 +209,13 @@ while(line ~= nil) do
 			date_colonel = parse_rank_date(split_line[10]);
 			date_brigadier = parse_rank_date(split_line[11]);
 			date_general = parse_rank_date(split_line[12]);
+
+			games_lieutenant = 0;
+			games_captain = 0;
+			games_commander = 0;
+			games_colonel = 0;
+			games_brigadier = 0;
+			games_general = 0;
 		end
 	end
 

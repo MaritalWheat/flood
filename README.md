@@ -3,6 +3,17 @@ flood
 
 Solution for pulling, parsing, and (eventually) analyzing Halo multiplayer data.
 
+Data Points to Grab:
+  Validated Player Pool [players whose rank achievement dates are available for all ranks achieved]
+    -games played per skill level
+    -ranked versus social games per skill level
+  General Pool
+    -total games played versus highest skill
+    -ranked versus social games played, versus highest skill
+    
+Wish List:
+  -games played after highest achieved skill reached
+
 =====
 
 Pipe >

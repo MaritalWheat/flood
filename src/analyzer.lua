@@ -93,6 +93,22 @@ function parse_game_date(input)
 	return out;
 end 
 
+--expects properly formatted parameters!
+--returns true if game date before rank date, false otherwise
+function date_compare(game_date, rank_date)
+	if (game_date.year < rank_date.year) then return true end;
+	if (game_date.year > rank_date.year) then return false end;
+	
+	if (game_date.month < rank_date.month) then return true end;
+	if (game_date.month > rank_date.month) then return false end;
+
+	if (game_date.date < rank_date.date) then return true end;
+	if (game_date.date > rank_date.date) then return false end;
+
+	--if exact same date, give game to lower rank
+	return true;
+end
+
 data = get_path();
 
 local data_index = 1;
@@ -108,6 +124,10 @@ local date_colonel;
 local date_brigadier;
 local date_general;
 
+local date1 = {month = "2", date = "10", year = "2012"};
+local date2 = {month = "2", date = "1", year = "2012"};
+
+print(date_compare(date1, date2));
 
 while(line ~= nil) do
 	
@@ -116,7 +136,7 @@ while(line ~= nil) do
 	split_line = line:split(" | ");
 
 	local game_date = parse_game_date(split_line[1]);
-	print(game_date.month .. "/" .. game_date.date .. "/" .. game_date.year);
+	--print(game_date.month .. "/" .. game_date.date .. "/" .. game_date.year);
 
 	--case for first player in file
 	if (curr_player == nil) then 

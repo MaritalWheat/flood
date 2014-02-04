@@ -212,12 +212,12 @@ while(line ~= nil) do
 				games_gen = games_general, valid = validity};
 
 
-			--insert Player object into table
+			--insert Player object into table [currently only if a player is valid!]
 			if (Player.valid) then
 			
-			table.insert(player_table, Player);
+				table.insert(player_table, Player);
 			
-			--print(Player.name .. " " .. Player.date_lt.month .. "/" .. Player.date_lt.date .. "/" .. Player.date_lt.year);
+				--print(Player.name .. " " .. Player.date_lt.month .. "/" .. Player.date_lt.date .. "/" .. Player.date_lt.year);
 			
 				print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
 					.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);

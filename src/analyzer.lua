@@ -133,6 +133,13 @@ function check_data_validity(highest_rank, lt, ct, com, col, bg, gen)
 	return false;
 end
 
+function get_ranked_status(game_mode)
+	if (string.match(game_mode, "Big Team Battle") or string.match(game_mode, "Lone Wolves") or string.match(game_mode, "MLG")
+		or string.match(game_mode, "Squad Battle") or string.match(game_mode, "Team Control") or string.match(game_mode, "Team Doubles")
+		or string.match(game_mode, "Team Objective") or string.match(game_mode, "Team Slayer") or string.match(game_mode, "Team Throwback")) then return true end;
+	return false;
+end
+
 data = get_path();
 
 local data_index = 1;
@@ -156,6 +163,9 @@ local games_commander = 0;
 local games_colonel = 0;
 local games_brigadier = 0;
 local games_general = 0;
+local games_ranked = 0;
+local games_social = 0;
+local total_games_played = 0;
 
 --is there data that covers all the ranks earned
 local validity = false;
@@ -186,6 +196,17 @@ while(line ~= nil) do
 		date_general = parse_rank_date(split_line[12]);
 	end
 
+	local is_ranked = get_ranked_status(split_line[3]);
+
+	if (is_ranked) then
+		games_ranked = games_ranked + 1;
+	--	print(split_line[3] .. " | Ranked");
+	else 
+		games_social = games_social + 1;
+	--	print(split_line[3] .. " | Unranked");
+	end
+
+	total_games_played = total_games_played + 1;
 
 	if (date_compare(game_date, date_lieutenant)) then games_lieutenant = games_lieutenant + 1 
 	elseif (date_compare(game_date, date_captain)) then games_captain = games_captain + 1
@@ -209,7 +230,7 @@ while(line ~= nil) do
 				date_com = date_commander, date_col = date_colonel, date_bg = date_brigadier,
 				date_gen = date_general, games_lt = games_lieutenant, games_ct = games_captain,
 				games_com = games_commander, games_col = games_colonel, games_bg = games_brigadier,
-				games_gen = games_general, valid = validity};
+				games_gen = games_general, valid = validity, num_ranked = games_ranked, num_social = games_social, num_games = total_games_played};
 
 
 			--insert Player object into table [currently only if a player is valid!]
@@ -219,8 +240,10 @@ while(line ~= nil) do
 			
 				--print(Player.name .. " " .. Player.date_lt.month .. "/" .. Player.date_lt.date .. "/" .. Player.date_lt.year);
 			
-				print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
-					.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);
+				--print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
+				--	.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);
+
+				print(Player.name .. " #Ranked: " .. Player.num_ranked .. " #Social: " .. Player.num_social .. " #Games: " .. Player.num_games);
 			end
 
 			--update current player
@@ -238,6 +261,9 @@ while(line ~= nil) do
 			games_colonel = 0;
 			games_brigadier = 0;
 			games_general = 0;
+			games_ranked = 0;
+			games_social = 0;
+			total_games_played = 0;
 
 			validity = false;
 		end

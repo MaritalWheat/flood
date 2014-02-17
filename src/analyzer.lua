@@ -122,14 +122,17 @@ function date_compare(game_date, rank_date)
 	return true;
 end
 
-function check_data_validity(highest_rank, lt, ct, com, col, bg, gen)
+function check_data_validity(highest_rank, lt, ct, com, col, bg, gen, total)
 	local rank_num = tonumber(highest_rank);
-	if (rank_num <= 10 and lt > 0) then return true end;
-	if (rank_num <= 20 and lt > 0 and ct > 0) then return true end;
-	if (rank_num <= 30 and lt > 0 and ct > 0 and com > 0) then return true end;
-	if (rank_num <= 40 and lt > 0 and ct > 0 and com > 0 and col > 0) then return true end;
-	if (rank_num <= 45 and lt > 0 and ct > 0 and com > 0 and col > 0 and bg > 0) then return true end;
-	if (rank_num <= 50 and lt > 0 and ct > 0 and com > 0 and col > 0 and bg > 0 and gen > 0) then return true end;
+	--print (rank_num .. " " .. lt)
+	if (rank_num < 10) then return true end;
+	if (rank_num < 20 and lt > 0) then return true end;
+	if (rank_num < 30 and lt > 0 and ct > 0) then return true end;
+	if (rank_num < 35 and lt > 0 and ct > 0 and (total - (lt + ct)) > 0) then return true end;
+	if (rank_num < 40 and lt > 0 and ct > 0 and com > 0) then return true end;
+	if (rank_num < 45 and lt > 0 and ct > 0 and com > 0 and col > 0) then return true end;
+	if (rank_num < 50 and lt > 0 and ct > 0 and com > 0 and col > 0 and bg > 0) then return true end;
+	if (rank_num == 50 and lt > 0 and ct > 0 and com > 0 and col > 0 and bg > 0 and gen > 0) then return true end;
 	return false;
 end
 
@@ -305,11 +308,13 @@ while(line ~= nil) do
 		if (user_validation ~= "unreliable") then
 			--create Player object
 			validity = check_data_validity(highest_rank, games_lieutenant, games_captain, games_commander,
-				games_colonel, games_brigadier, games_general);
+				games_colonel, games_brigadier, games_general, total_games_played);
 
-			debugValid = "invalid";
-			if (validity) then debugValid = "valid" end
-			print (debugValid .. " (" .. highest_rank .. ")")
+			if (total_games_played == 0) then validity = false end;
+
+			--debugValid = "invalid";
+			--if (validity) then debugValid = "valid" end
+			--print (debugValid .. " (" .. highest_rank .. ") " .. curr_player .. " " .. games_lieutenant .. " " .. games_captain)
 
 			local Player = {name = curr_player, max_rank = highest_rank, date_lt = date_lieutenant, date_ct = date_captain,
 				date_com = date_commander, date_col = date_colonel, date_bg = date_brigadier,

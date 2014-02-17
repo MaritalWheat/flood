@@ -140,6 +140,37 @@ function get_ranked_status(game_mode)
 	return false;
 end
 
+function write_out(player_table)
+	local writeable = io.open("/Users/emanuelrosu/Documents/the-flood/src/test.txt", "w");
+	local index = 1;
+	local player = player_table[index];
+	while (player ~= nil) do
+		writeable:write(player.name);
+		--writeable:write("," .. player.r_lt / player.games_lt)-- .. "," .. player.s_lt / player.games_lt);
+		--writeable:write("," .. player.r_ct / player.games_ct)-- .. "," .. player.s_ct / player.games_ct);
+		--writeable:write("," .. player.r_com / player.games_com)-- .. "," .. player.s_com / player.games_com);
+		--writeable:write("," .. player.r_col / player.games_col)-- .. "," .. player.s_col / player.games_col);
+		--writeable:write("," .. player.r_bg / player.games_bg)-- .. "," .. player.s_bg / player.games_bg);
+		--writeable:write("," .. player.r_gen / player.games_gen)-- .. "," .. player.s_gen / player.games_gen);
+		
+		writeable:write(", " .. player.max_rank);
+		writeable:write(", " .. player.num_games);
+		writeable:write(", " .. (player.num_games - player.games_lt - player.games_ct - player.games_com - player.games_col - player.games_bg - player.games_gen) / player.num_games);
+		writeable:write(", " .. (player.num_ranked - player.r_lt - player.r_ct - player.r_com - player.r_col - player.r_bg - player.r_gen) / player.num_ranked);
+
+		--writeable:write(", " .. player.games_lt / player.num_games);
+		--writeable:write(", " .. player.games_ct / player.num_games);
+		--writeable:write(", " .. player.games_com / player.num_games);
+		--writeable:write(", " .. player.games_col / player.num_games);
+		--writeable:write(", " .. player.games_bg / player.num_games);
+		--writeable:write(", " .. player.games_gen / player.num_games);
+		print(player.name .. " " .. player.num_games .. " " .. player.games_lt);
+		index = index + 1;
+		player = player_table[index];
+		writeable:write("\n");
+	end
+end
+
 data = get_path();
 
 local data_index = 1;
@@ -166,6 +197,19 @@ local games_general = 0;
 local games_ranked = 0;
 local games_social = 0;
 local total_games_played = 0;
+
+local r_games_lieut = 0;
+local s_games_lieut = 0;
+local r_games_capt = 0;
+local s_games_capt = 0;
+local r_games_command = 0;
+local s_games_command = 0;
+local r_games_col = 0;
+local s_games_col = 0;
+local r_games_brig = 0;
+local s_games_brig = 0;
+local r_games_gen = 0;
+local s_games_gen = 0;
 
 --is there data that covers all the ranks earned
 local validity = false;
@@ -208,12 +252,49 @@ while(line ~= nil) do
 
 	total_games_played = total_games_played + 1;
 
-	if (date_compare(game_date, date_lieutenant)) then games_lieutenant = games_lieutenant + 1 
-	elseif (date_compare(game_date, date_captain)) then games_captain = games_captain + 1
-	elseif (date_compare(game_date, date_commander)) then games_commander = games_commander + 1
-	elseif (date_compare(game_date, date_colonel)) then games_colonel = games_colonel + 1
-	elseif (date_compare(game_date, date_brigadier)) then games_brigadier = games_brigadier + 1
-	elseif (date_compare(game_date, date_general)) then games_general = games_general + 1 end;
+	if (date_compare(game_date, date_lieutenant)) then 
+		games_lieutenant = games_lieutenant + 1; 
+		if (is_ranked) then
+			r_games_lieut = r_games_lieut + 1;
+		else 
+			s_games_lieut = s_games_lieut + 1;
+		end
+	elseif (date_compare(game_date, date_captain)) then 
+		games_captain = games_captain + 1;
+		if (is_ranked) then
+			r_games_capt = r_games_capt + 1;
+		else 
+			s_games_capt = s_games_capt + 1;
+		end
+	elseif (date_compare(game_date, date_commander)) then 
+		games_commander = games_commander + 1;
+		if (is_ranked) then
+			r_games_command = r_games_command + 1;
+		else 
+			s_games_command = s_games_command + 1;
+		end
+	elseif (date_compare(game_date, date_colonel)) then 
+		games_colonel = games_colonel + 1;
+		if (is_ranked) then
+			r_games_col = r_games_col + 1;
+		else 
+			s_games_col = s_games_col + 1;
+		end
+	elseif (date_compare(game_date, date_brigadier)) then 
+		games_brigadier = games_brigadier + 1;
+		if (is_ranked) then
+			r_games_brig = r_games_brig + 1;
+		else 
+			s_games_brig = s_games_brig + 1;
+		end
+	elseif (date_compare(game_date, date_general)) then 
+		games_general = games_general + 1; 
+		if (is_ranked) then
+			r_games_gen = r_games_gen + 1;
+		else 
+			s_games_gen = s_games_gen + 1;
+		end
+	end;
 
 	--work done if player switched
 	if (split_line[5] ~= curr_player) then
@@ -226,11 +307,28 @@ while(line ~= nil) do
 			validity = check_data_validity(highest_rank, games_lieutenant, games_captain, games_commander,
 				games_colonel, games_brigadier, games_general);
 
+			debugValid = "invalid";
+			if (validity) then debugValid = "valid" end
+			print (debugValid .. " (" .. highest_rank .. ")")
+
 			local Player = {name = curr_player, max_rank = highest_rank, date_lt = date_lieutenant, date_ct = date_captain,
 				date_com = date_commander, date_col = date_colonel, date_bg = date_brigadier,
 				date_gen = date_general, games_lt = games_lieutenant, games_ct = games_captain,
 				games_com = games_commander, games_col = games_colonel, games_bg = games_brigadier,
-				games_gen = games_general, valid = validity, num_ranked = games_ranked, num_social = games_social, num_games = total_games_played};
+				games_gen = games_general, valid = validity, num_ranked = games_ranked, num_social = games_social, num_games = total_games_played,
+				r_lt = r_games_lieut,
+				s_lt = s_games_lieut;
+				r_ct = r_games_capt,
+				s_ct = s_games_capt,
+				r_com = r_games_command,
+				s_com = s_games_command,
+				r_col = r_games_col,
+				s_col = s_games_col,
+				r_bg = r_games_brig,
+				s_bg = s_games_brig,
+				r_gen = r_games_gen,
+				s_gen = s_games_gen
+				};
 
 
 			--insert Player object into table [currently only if a player is valid!]
@@ -243,11 +341,15 @@ while(line ~= nil) do
 				--print(Player.name .. " " .. Player.games_lt .. " " .. Player.games_ct .. " " .. Player.games_com
 				--	.. " " .. Player.games_col .. " " .. Player.games_bg .. " " .. Player.games_gen);
 
-				print(Player.name .. " #Ranked: " .. Player.num_ranked .. " #Social: " .. Player.num_social .. " #Games: " .. Player.num_games);
+				--print(Player.name .. " #Ranked: " .. Player.num_ranked .. " #Social: " .. Player.num_social .. " #Games: " .. Player.num_games);
+
+				--print(Player.name .. " " .. Player.r_lt .. " " .. Player.r_ct .. " " .. Player.r_com .. " " .. Player.r_col .. " " .. Player.r_bg ..
+				--	" " .. Player.r_gen)
 			end
 
 			--update current player
 			curr_player = split_line[5];
+			highest_rank = split_line[6];
 			date_lieutenant = parse_rank_date(split_line[7]);
 			date_captain = parse_rank_date(split_line[8]);
 			date_commander = parse_rank_date(split_line[9]);
@@ -265,6 +367,19 @@ while(line ~= nil) do
 			games_social = 0;
 			total_games_played = 0;
 
+			r_games_lieut = 0;
+			s_games_lieut = 0;
+			r_games_capt = 0;
+			s_games_capt = 0;
+			r_games_command = 0;
+			s_games_command = 0;
+			r_games_col = 0;
+			s_games_col = 0;
+			r_games_brig = 0;
+			s_games_brig = 0;
+			r_games_gen = 0;
+			s_games_gen = 0;
+
 			validity = false;
 		end
 	end
@@ -274,6 +389,7 @@ while(line ~= nil) do
 end
 
 print("Number of entries: " .. #player_table);
+write_out(player_table);
 
 
 
